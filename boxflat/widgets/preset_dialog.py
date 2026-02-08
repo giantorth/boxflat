@@ -38,10 +38,18 @@ class BoxflatPresetDialog(Adw.Dialog, EventDispatcher):
         self._auto_apply = BoxflatSwitchRow("Apply automatically")
         self._auto_apply.set_subtitle("Apply when selected process is running")
 
-        self._auto_apply_name = BoxflatLabelRow("Process name")
-        self._auto_apply_name.set_label(process_name)
+        self._auto_apply_name = BoxflatLabelRow("Process pattern")
+        self._auto_apply_name.set_subtitle("Can be a process name or command-line pattern")
+        # Display truncated version if too long, but store full pattern
+        display_name = process_name
+        if len(display_name) > 60:
+            display_name = display_name[:57] + "..."
+        self._auto_apply_name.set_label(display_name)
         self._auto_apply_name.set_active(False)
         self._auto_apply.subscribe(self._auto_apply_name.set_active)
+
+        # Store the full pattern for saving
+        self._full_process_pattern = process_name
 
         self._auto_apply_select = BoxflatAdvanceRow("Select running process")
         self._auto_apply_select.set_active(False)
@@ -135,10 +143,11 @@ class BoxflatPresetDialog(Adw.Dialog, EventDispatcher):
     def _notify_save(self, *rest):
         self.close()
 
-        process_name = ""
+        process_pattern = ""
         if self._auto_apply.get_value():
-            process_name = self._auto_apply_name.get_label()
-        self._preset_handler.set_linked_process(process_name)
+            # Use the full pattern, not the potentially truncated display label
+            process_pattern = self._full_process_pattern
+        self._preset_handler.set_linked_process(process_pattern)
 
         self._preset_handler.set_default(self._default.get_value())
 
@@ -157,22 +166,55 @@ class BoxflatPresetDialog(Adw.Dialog, EventDispatcher):
 
     def _list_processes(self, entry: Adw.EntryRow, page: Adw.PreferencesPage):
         group = Adw.PreferencesGroup()
-        name = entry.get_text()
+        filter_text = entry.get_text()
 
         page.remove(self._process_list_group)
         page.add(group)
         self._process_list_group = group
 
-        if len(name) < 3:
+        if len(filter_text) < 3:
             group.add(BoxflatLabelRow("Enter at least three letters"))
             return
 
-        for name in sorted(process_handler.list_processes(name)):
-            row = BoxflatLabelRow(name)
-            row.subscribe(self._navigation.pop)
-            row.subscribe(self._auto_apply_name.set_label, name)
+        processes = process_handler.list_processes(filter_text)
+
+        if not processes:
+            group.add(BoxflatLabelRow("No matching processes found"))
+            return
+
+        # Sort by process name for better UX
+        processes.sort(key=lambda p: p.name.lower())
+
+        for process_info in processes:
+            # Create a row that shows both name and command line
+            row = Adw.ActionRow()
+            row.set_title(process_info.name)
+
+            # Show command line as subtitle if it differs from name
+            if process_info.cmdline != process_info.name:
+                # Truncate long command lines for display
+                cmdline_display = process_info.cmdline
+                if len(cmdline_display) > 80:
+                    cmdline_display = cmdline_display[:77] + "..."
+                row.set_subtitle(cmdline_display)
+
+            # When clicked, use the full command line as the pattern
+            # This allows matching specific games even with same executable
+            row.connect("activated", lambda r, cmd=process_info.cmdline: self._select_process(cmd))
             row.set_activatable(True)
             group.add(row)
+
+
+    def _select_process(self, cmdline_pattern: str):
+        """Called when user selects a process from the list."""
+        self._navigation.pop()
+        # Store the full pattern
+        self._full_process_pattern = cmdline_pattern
+        # Display truncated version if needed
+        display_pattern = cmdline_pattern
+        if len(display_pattern) > 60:
+            display_pattern = display_pattern[:57] + "..."
+        self._auto_apply_name.set_label(display_pattern)
 
 
     def _open_process_page(self, *rest):

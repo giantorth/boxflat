@@ -6,14 +6,14 @@ if [[ $1 == "add-prefix" ]]; then
     PREFIX="$2"
 fi
 
-# uninstall boxflat
+# uninstall foxblat
 if [[ $1 == "remove" || $3 == "remove" ]]; then
-    rm "$PREFIX/usr/share/applications/"*boxflat.desktop
-    rm "$PREFIX/usr/bin/boxflat"
-    rm "$PREFIX/usr/share/metainfo/"*boxflat*
-    rm -rf "$PREFIX/usr/share/boxflat"
+    rm "$PREFIX/usr/share/applications/"*foxblat.desktop
+    rm "$PREFIX/usr/bin/foxblat"
+    rm "$PREFIX/usr/share/metainfo/"*foxblat*
+    rm -rf "$PREFIX/usr/share/foxblat"
     cp -r ./icons/* "$PREFIX/usr/share/icons/hicolor/"
-    rm "$PREFIX/usr/lib/udev/rules.d/"*boxflat*.rules
+    rm "$PREFIX/usr/lib/udev/rules.d/"*foxblat*.rules
     exit 0
 fi
 
@@ -23,18 +23,18 @@ if [[ -n $PREFIX ]]; then
     mkdir -p "$PREFIX/usr/share/applications"
 fi
 
-mkdir -p "$PREFIX/usr/share/boxflat"
+mkdir -p "$PREFIX/usr/share/foxblat"
 mkdir -p "$PREFIX/usr/share/metainfo"
 mkdir -p "$PREFIX/usr/share/icons/hicolor/"
 
-cp -r ./boxflat "$PREFIX/usr/share/boxflat/"
-cp -r ./data "$PREFIX/usr/share/boxflat/"
+cp -r ./foxblat "$PREFIX/usr/share/foxblat/"
+cp -r ./data "$PREFIX/usr/share/foxblat/"
 cp -r ./icons/* "$PREFIX/usr/share/icons/hicolor/"
-cp -r ./udev "$PREFIX/usr/share/boxflat/"
-cp entrypoint.py "$PREFIX/usr/share/boxflat/"
+cp -r ./udev "$PREFIX/usr/share/foxblat/"
+cp entrypoint.py "$PREFIX/usr/share/foxblat/"
 cp ./*metainfo.xml "$PREFIX/usr/share/metainfo/"
 
-cp --preserve=mode "boxflat.sh" "$PREFIX/usr/bin/boxflat"
+cp --preserve=mode "foxblat.sh" "$PREFIX/usr/bin/foxblat"
 cp ./*.desktop "$PREFIX/usr/share/applications/"
 cp udev/* "$PREFIX/usr/lib/udev/rules.d/"
 

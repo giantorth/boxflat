@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 """
-Boxflat IPC Client
+Foxblat IPC Client
 
-Example client for controlling boxflat via TCP socket.
+Example client for controlling foxblat via TCP socket.
 Can be used as a standalone command-line tool or imported as a library.
 
 Usage as command-line tool:
-    ./boxflat_ipc_client.py set-angle 900
-    ./boxflat_ipc_client.py get-angle
-    ./boxflat_ipc_client.py load-preset GT3
-    ./boxflat_ipc_client.py list-presets
+    ./foxblat_ipc_client.py set-angle 900
+    ./foxblat_ipc_client.py get-angle
+    ./foxblat_ipc_client.py load-preset GT3
+    ./foxblat_ipc_client.py list-presets
 
 Usage as library:
-    from boxflat_ipc_client import BoxflatClient
+    from foxblat_ipc_client import FoxblatClient
 
-    client = BoxflatClient()
+    client = FoxblatClient()
     client.set_angle(900)
     angle = client.get_angle()
     client.load_preset("GT3")
@@ -26,8 +26,8 @@ import sys
 from typing import Dict, Any
 
 
-class BoxflatClient:
-    """Client for communicating with boxflat via TCP socket."""
+class FoxblatClient:
+    """Client for communicating with foxblat via TCP socket."""
 
     def __init__(self, host: str = "127.0.0.1", port: int = 52845):
         """
@@ -42,17 +42,17 @@ class BoxflatClient:
 
     def _send_command(self, command: str, **kwargs) -> Dict[str, Any]:
         """
-        Send a command to boxflat and return the response.
+        Send a command to foxblat and return the response.
 
         Args:
             command: The command name
             **kwargs: Additional command parameters
 
         Returns:
-            Response dictionary from boxflat
+            Response dictionary from foxblat
 
         Raises:
-            ConnectionError: If cannot connect to boxflat
+            ConnectionError: If cannot connect to foxblat
             RuntimeError: If command fails
         """
         message = {"command": command, **kwargs}
@@ -77,9 +77,9 @@ class BoxflatClient:
             return response
 
         except socket.error as e:
-            raise ConnectionError(f"Cannot connect to boxflat at {self.host}:{self.port}: {e}. Is boxflat running?")
+            raise ConnectionError(f"Cannot connect to foxblat at {self.host}:{self.port}: {e}. Is foxblat running?")
         except json.JSONDecodeError as e:
-            raise RuntimeError(f"Invalid response from boxflat: {e}")
+            raise RuntimeError(f"Invalid response from foxblat: {e}")
 
     def set_angle(self, angle: int) -> Dict[str, Any]:
         """
@@ -156,14 +156,14 @@ class BoxflatClient:
 
     def ping(self) -> bool:
         """
-        Ping boxflat to check if it's responding.
+        Ping foxblat to check if it's responding.
 
         Returns:
-            True if boxflat responds
+            True if foxblat responds
 
         Example:
             if client.ping():
-                print("Boxflat is running")
+                print("Foxblat is running")
         """
         try:
             response = self._send_command("ping")
@@ -175,10 +175,10 @@ class BoxflatClient:
 def main():
     """Command-line interface."""
     if len(sys.argv) < 2:
-        print("Boxflat IPC Client")
+        print("Foxblat IPC Client")
         print()
         print("Usage:")
-        print("  boxflat_ipc_client.py <command> [args]")
+        print("  foxblat_ipc_client.py <command> [args]")
         print()
         print("Commands:")
         print("  set-angle <degrees> Set steering lock angle (90-2700)")
@@ -186,22 +186,22 @@ def main():
         print("  status              Get device connection status")
         print("  list-presets        List available presets")
         print("  load-preset <name>  Load a preset")
-        print("  ping                Check if boxflat is running")
+        print("  ping                Check if foxblat is running")
         print()
         print("Examples:")
-        print("  boxflat_ipc_client.py set-angle 900")
-        print("  boxflat_ipc_client.py load-preset GT3")
-        print("  boxflat_ipc_client.py get-angle")
+        print("  foxblat_ipc_client.py set-angle 900")
+        print("  foxblat_ipc_client.py load-preset GT3")
+        print("  foxblat_ipc_client.py get-angle")
         sys.exit(1)
 
     command = sys.argv[1]
-    client = BoxflatClient()
+    client = FoxblatClient()
 
     try:
         if command == "set-angle":
             if len(sys.argv) < 3:
                 print("Error: Missing angle value")
-                print("Usage: boxflat_ipc_client.py set-angle <degrees>")
+                print("Usage: foxblat_ipc_client.py set-angle <degrees>")
                 sys.exit(1)
 
             angle = int(sys.argv[2])
@@ -229,7 +229,7 @@ def main():
         elif command == "load-preset":
             if len(sys.argv) < 3:
                 print("Error: Missing preset name")
-                print("Usage: boxflat_ipc_client.py load-preset <name>")
+                print("Usage: foxblat_ipc_client.py load-preset <name>")
                 sys.exit(1)
 
             preset_name = sys.argv[2]
@@ -238,9 +238,9 @@ def main():
 
         elif command == "ping":
             if client.ping():
-                print("✓ Boxflat is running")
+                print("✓ Foxblat is running")
             else:
-                print("✗ Cannot reach boxflat")
+                print("✗ Cannot reach foxblat")
                 sys.exit(1)
 
         else:

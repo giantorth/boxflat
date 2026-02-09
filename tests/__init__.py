@@ -1,1 +1,1 @@
-# Tests package for Boxflat
+# Tests package for Foxblat

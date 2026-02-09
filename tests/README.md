@@ -1,6 +1,6 @@
-# Boxflat Tests
+# Foxblat Tests
 
-This directory contains unit tests for the Boxflat application.
+This directory contains unit tests for the Foxblat application.
 
 ## Running Tests
 

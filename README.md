@@ -1,9 +1,9 @@
-# Boxflat
-Boxflat for Moza Racing. Control your Moza gear settings... and more!
+# Foxblat
+Foxblat for Moza Racing. Control your Moza gear settings... and more!
 
 <img alt="Wheelbase panel" src="screens/base.png">
 
-<a href="https://flathub.org/apps/io.github.lawstorant.boxflat">
+<a href="https://flathub.org/apps/io.github.lawstorant.foxblat">
     <img alt="Get it on Flathub" src="https://flathub.org/api/badge?locale=en"/>
 </a>
 
@@ -37,9 +37,6 @@ Boxflat for Moza Racing. Control your Moza gear settings... and more!
 | Presets         | 100%          | |
 | Generic devices | Detection fix | |
 
-### Preset Auto-Loading
-Presets can automatically load when specific games are detected. The system now supports full command-line pattern matching, allowing you to distinguish between games from the same publisher (e.g., different EA games that all launch through `EADesktop.exe`). Patterns can be simple process names or command-line substrings for precise matching.
-
 ### Ideas
 - Telemetry ingestion through REST API/WebSockets
 - Cammus support
@@ -55,29 +52,29 @@ Moza commands and their protocol is hardware agnostic, so any implemented featur
 
 Wheel indicator blinking colors can't be read from the wheel. This is a limitation of the current firmware.
 
-Boxflat automatically detects is a device (shifter/pedals) needs a detection fix and creates a proper virutal device. This fixes game detection.
+Foxblat automatically detects is a device (shifter/pedals) needs a detection fix and creates a proper virutal device. This fixes game detection.
 
 > [!TIP]
 > Detection fix can be applied to any HID device as well (pedals, shifters, button boxes).
 
 # Installation
 ## Flatpak (preferred method)
-Boxflat is available on **[Flathub](https://flathub.org/apps/io.github.lawstorant.boxflat)**
+Foxblat is available on **[Flathub](https://flathub.org/apps/io.github.lawstorant.foxblat)**
 
 ### Udev rule installation for flatpak
 Copy this into terminal and execute with root permissions
 ```bash
-sudo tee /etc/udev/rules.d/99-boxflat.rules <<< 'SUBSYSTEM=="tty", KERNEL=="ttyACM*", ATTRS{idVendor}=="346e", ACTION=="add", MODE="0666", TAG+="uaccess"'
+sudo tee /etc/udev/rules.d/99-foxblat.rules <<< 'SUBSYSTEM=="tty", KERNEL=="ttyACM*", ATTRS{idVendor}=="346e", ACTION=="add", MODE="0666", TAG+="uaccess"'
 ```
 
 > [!IMPORTANT]
 > Unplug and plug in your deivce to trigger these new rules. Alternatively, you can reboot your system.
 
 ## Arch Linux:
-https://aur.archlinux.org/packages/boxflat-git
+https://aur.archlinux.org/packages/foxblat-git
 
 ## Void Linux:
-`xbps-install -S boxflat`
+`xbps-install -S foxblat`
 
 ## Manual:
 This package depends on:
@@ -109,8 +106,8 @@ Installation:
 ```bash
 # Run `install.sh` with root permissions.
 $ sudo ./install.sh
-# Application will be installed as `boxflat`
-$ boxflat
+# Application will be installed as `foxblat`
+$ foxblat
 ```
 Removal:
 ```bash
@@ -123,7 +120,7 @@ Below are some common problems and possible solutions:
 - `Error getting authority` when adding/updating the udev rules: make sure
   the `dbus` service is running
 - Wheelbase does not appear, `dmesg` shows it connecting and getting assigned
-  an USB device, but it doesn't show up in boxflat -- check the `/dev` folder
+  an USB device, but it doesn't show up in foxblat -- check the `/dev` folder
   with `ls /dev/ttyACM*`, if there is nothing you might be missing the
   `CDC ACM` serial driver in the kernel
 - There is no FFB - if your torque is up to 100%, try turning it down to 95%

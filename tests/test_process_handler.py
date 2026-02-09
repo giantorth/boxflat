@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Unit tests for boxflat.process_handler
+Unit tests for foxblat.process_handler
 
 Tests the ProcessInfo class and pattern matching functionality.
 """
@@ -12,7 +12,7 @@ import os
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from boxflat.process_handler import ProcessInfo
+from foxblat.process_handler import ProcessInfo
 
 
 class TestProcessInfo(unittest.TestCase):
@@ -64,7 +64,7 @@ class TestPatternMatching(unittest.TestCase):
         """Set up test fixtures."""
         # Only import ProcessObserver when running on Linux or in test environment
         try:
-            from boxflat.process_handler import ProcessObserver
+            from foxblat.process_handler import ProcessObserver
             cls.observer = ProcessObserver()
         except Exception as e:
             cls.observer = None
@@ -151,7 +151,7 @@ class TestProcessObserverRegistration(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         try:
-            from boxflat.process_handler import ProcessObserver
+            from foxblat.process_handler import ProcessObserver
             self.observer = ProcessObserver()
         except Exception as e:
             self.observer = None
@@ -219,19 +219,19 @@ class TestListProcesses(unittest.TestCase):
     def test_list_processes_returns_list(self):
         """Test that list_processes returns a list of ProcessInfo."""
         try:
-            from boxflat.process_handler import list_processes
+            from foxblat.process_handler import list_processes
             result = list_processes()
             self.assertIsInstance(result, list)
             if result:
                 self.assertIsInstance(result[0], ProcessInfo)
         except KeyError:
-            # BOXFLAT_FLATPAK_EDITION env var not set
-            self.skipTest("BOXFLAT_FLATPAK_EDITION not set")
+            # FOXBLAT_FLATPAK_EDITION env var not set
+            self.skipTest("FOXBLAT_FLATPAK_EDITION not set")
 
     def test_list_processes_with_filter(self):
         """Test that list_processes filter works."""
         try:
-            from boxflat.process_handler import list_processes
+            from foxblat.process_handler import list_processes
             # Filter for python - should find at least the test runner
             result = list_processes("python")
             self.assertIsInstance(result, list)
@@ -241,12 +241,12 @@ class TestListProcesses(unittest.TestCase):
                     f"Filter failed: {proc}"
                 )
         except KeyError:
-            self.skipTest("BOXFLAT_FLATPAK_EDITION not set")
+            self.skipTest("FOXBLAT_FLATPAK_EDITION not set")
 
     def test_list_processes_no_duplicates(self):
         """Test that list_processes doesn't return duplicates."""
         try:
-            from boxflat.process_handler import list_processes
+            from foxblat.process_handler import list_processes
             result = list_processes()
             # Convert to set of tuples to check for duplicates
             seen = set()
@@ -255,7 +255,7 @@ class TestListProcesses(unittest.TestCase):
                 self.assertNotIn(key, seen, f"Duplicate process found: {proc}")
                 seen.add(key)
         except KeyError:
-            self.skipTest("BOXFLAT_FLATPAK_EDITION not set")
+            self.skipTest("FOXBLAT_FLATPAK_EDITION not set")
 
 
 if __name__ == "__main__":

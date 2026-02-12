@@ -5,13 +5,14 @@ gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 
 
-from gi.repository import Gtk, Gdk, Adw
+from gi.repository import Gtk, Gdk, Adw, GLib
 from foxblat.panels import *
 from foxblat.connection_manager import MozaConnectionManager
 from foxblat.hid_handler import HidHandler
 from foxblat.settings_handler import SettingsHandler
 from foxblat.simapi_handler import SimApiHandler
 from foxblat.ipc_handler import IpcHandler
+from foxblat.plugin_manager import PluginManager
 from threading import Thread, Event
 
 import os
@@ -139,10 +140,7 @@ class MyApp(Adw.Application):
         self.connect('shutdown', self._shutdown)
 
         self.Tray = None
-
-        css_provider = Gtk.CssProvider()
-        css_provider.load_from_path(f"{data_path}/style.css")
-        Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        self._css_loaded = False
 
         self._settings = SettingsHandler(config_path)
         if self._settings.read_setting("moza-detection-fix-enabled") is None:
@@ -162,6 +160,8 @@ class MyApp(Adw.Application):
         self._cm.subscribe("hid-device-disconnected", self._hid_handler.remove_device)
         self._simapi_handler.set_connection_manager(self._cm)
 
+        self._plugin_manager = PluginManager(config_path, self._hid_handler, self._settings)
+
         self._ipc_handler = IpcHandler(self._cm, self._settings)
         if not dry_run:
             self._ipc_handler.start()
@@ -178,6 +178,7 @@ class MyApp(Adw.Application):
         navigation.set_min_sidebar_width(200)
 
         box2 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self._sidebar_box = box2  # Store reference for plugin panel buttons
 
         left = Adw.ToolbarView()
         left.add_top_bar(Adw.HeaderBar())
@@ -224,6 +225,12 @@ class MyApp(Adw.Application):
 
 
     def on_activate(self, app):
+        if not self._css_loaded:
+            css_provider = Gtk.CssProvider()
+            css_provider.load_from_path(f"{self._data_path}/style.css")
+            Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+            self._css_loaded = True
+
         autostart = self._autostart
         self._autostart = False
 
@@ -316,7 +323,13 @@ class MyApp(Adw.Application):
         self._panels["Multifunction Stalks"] = StalksSettings(self.switch_panel, self._cm, self._hid_handler, self._settings)
         self._panels["Universal Hub"] = HubSettings(self.switch_panel, self._cm)
 
-        self._panels["Presets"] = PresetSettings(self.switch_panel, self._cm, self._settings, self._panels["H-Pattern Shifter"], self._panels["Multifunction Stalks"], self._simapi_handler)
+        # Start plugin manager and load plugin panels
+        # Subscribe to dynamic plugin panel events (for devices connected after startup)
+        self._plugin_manager.subscribe("plugin-panel-available", self._on_plugin_panel_available)
+        self._plugin_manager.start()
+        self._load_plugin_panels()
+
+        self._panels["Presets"] = PresetSettings(self.switch_panel, self._cm, self._settings, self._panels["H-Pattern Shifter"], self._panels["Multifunction Stalks"], self._simapi_handler, self._plugin_manager)
         self._panels["Presets"].set_application(self)
 
         # Subscribe preset panel to IPC preset load events
@@ -347,7 +360,36 @@ class MyApp(Adw.Application):
         self._cm.set_write_active()
 
 
+    def _load_plugin_panels(self) -> None:
+        """Load panels from plugins that have connected devices."""
+        plugin_panels = self._plugin_manager.get_plugin_panels(self.switch_panel)
+
+        for title, panel in plugin_panels.items():
+            self._add_plugin_panel(title, panel)
+
+
+    def _on_plugin_panel_available(self, plugin_name: str, panel) -> None:
+        """Called when a plugin's matching device is connected (from background thread)."""
+        title = panel.title
+        GLib.idle_add(self._add_plugin_panel, title, panel)
+
+
+    def _add_plugin_panel(self, title: str, panel) -> None:
+        """Add a plugin panel to the UI."""
+        if title in self._panels:
+            return
+
+        self._panels[title] = panel
+        self._sidebar_box.append(panel.button)
+        # Set button group to first panel's button for radio behavior
+        first_button = list(self._panels.values())[0].button
+        panel.button.set_group(first_button)
+        print(f"[APP] Added plugin panel: {title}")
+
+
     def _shutdown(self, *_) -> None:
+        self._plugin_manager.stop()
+
         for panel in self._panels.values():
             panel.shutdown()
 

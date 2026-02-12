@@ -1,0 +1,11 @@
+{
+    "name": "GX-100 Shifter",
+    "version": "1.0.0",
+    "author": "Foxblat Community",
+    "description": "Configuration panel for GX-100 USB shifter",
+    "panel_title": "GX-100",
+    "panel_class": "GX100Panel",
+    "devices": [
+        {"vendor_id": "0x04b0", "product_id": "0x5750"}
+    ]
+}

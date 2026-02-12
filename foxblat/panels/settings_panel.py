@@ -103,7 +103,14 @@ class SettingsPanel(EventDispatcher):
         GLib.idle_add(self._banner.set_button_label, new_label)
 
     def show_toast(self, title: str, timeout=0):
-        GLib.idle_add(self._content.add_toast, Adw.Toast(title=title, timeout=timeout))
+        GLib.idle_add(self._show_toast_safe, title, timeout)
+
+    def _show_toast_safe(self, title: str, timeout: int):
+        # Only show toast if the content is parented to a window
+        # Otherwise add_toast can crash with gtk_widget_is_ancestor assertion
+        if self._content.get_root() is None:
+            return
+        self._content.add_toast(Adw.Toast(title=title, timeout=timeout))
 
     def apply(self, *arg):
         # self.hide_banner()

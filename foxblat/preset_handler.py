@@ -197,6 +197,7 @@ class MozaPresetHandler(SimpleEventDispatcher):
         self._name = None
         self._hpattern = {}
         self._stalks = {}
+        self._plugin_settings = {}  # Plugin settings to be saved
 
 
     def set_path(self, preset_path: str):
@@ -258,6 +259,24 @@ class MozaPresetHandler(SimpleEventDispatcher):
 
     def get_stalks_settings(self) -> map:
         return self._stalks
+
+    def set_plugin_settings(self, settings: dict) -> None:
+        """Set plugin settings to be saved in the preset."""
+        self._plugin_settings = settings
+
+    def get_plugin_settings(self) -> dict:
+        """Get plugin settings from the preset file."""
+        data = self._get_preset_data()
+        if data is None:
+            return {}
+
+        plugin_settings = {}
+        for key, value in data.items():
+            if key.startswith("plugin-"):
+                device_name = key[7:]  # Remove "plugin-" prefix
+                plugin_settings[device_name] = value
+
+        return plugin_settings
 
 
     def _get_preset_data(self) -> dict:
@@ -376,6 +395,11 @@ class MozaPresetHandler(SimpleEventDispatcher):
                         continue
                     preset_data[device][setting] = value
                     tries = 3
+
+        # Save plugin settings with "plugin-" prefix
+        for device_name, settings in self._plugin_settings.items():
+            if settings:
+                preset_data[f"plugin-{device_name}"] = settings
 
         process_name = self.get_linked_process()
         default = self.is_default()

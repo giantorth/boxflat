@@ -16,14 +16,16 @@ from gi.repository.Gio import Notification, NotificationPriority
 
 class PresetSettings(SettingsPanel):
     def __init__(self, button_callback, connection_manager: MozaConnectionManager, settings: SettingsHandler,
-                 hpattern: HPatternSettings, stalks: StalksSettings, simapi_handler=None):
+                 hpattern: HPatternSettings, stalks: StalksSettings, simapi_handler=None, plugin_manager=None):
         self._settings = settings
         self._simapi = simapi_handler
+        self._plugin_manager = plugin_manager
 
         self._hpattern = hpattern
         self._stalks = stalks
 
         self._includes = {}
+        self._plugin_includes = {}  # Separate dict for plugin includes
         self._name_row = Adw.EntryRow()
         self._name_row.set_title("Preset Name")
 
@@ -32,8 +34,13 @@ class PresetSettings(SettingsPanel):
         self._presets_list_group = None
         self._presets = []
         self._default_preset = None
+        self._include_expander = None  # Store expander for adding plugin switches
         super().__init__("Presets", button_callback, connection_manager)
         self.list_presets()
+
+        # Subscribe to plugin panel availability for dynamic switch addition
+        if self._plugin_manager:
+            self._plugin_manager.subscribe("plugin-panel-available", self._on_plugin_available)
 
         if self._settings.read_setting("default-preset-on-startup"):
             Thread(target=self._load_default, args=[5], daemon=True).start()
@@ -45,6 +52,7 @@ class PresetSettings(SettingsPanel):
         self._add_row(self._name_row)
 
         expander = Adw.ExpanderRow(title="Include Devices")
+        self._include_expander = expander
         self._add_row(expander)
 
         row = FoxblatSwitchRow("Base")
@@ -131,6 +139,9 @@ class PresetSettings(SettingsPanel):
         self._stalks.subscribe("active", row.set_present)
         self._includes["stalks"] = row.get_value
 
+        # Add plugin device switches dynamically
+        self._add_plugin_switches()
+
         self._observer = process_handler.ProcessObserver()
         self._observer.set_simapi_handler(self._simapi)
         self._observer.subscribe("no-games", self._load_default)
@@ -174,11 +185,52 @@ class PresetSettings(SettingsPanel):
         pm.set_hpattern_settings(self._hpattern.get_settings())
         pm.set_stalks_settings(self._stalks.get_settings())
 
+        # Collect plugin settings to save
+        plugin_settings = {}
+        if self._plugin_manager:
+            for device_name, get_value in self._plugin_includes.items():
+                if get_value():
+                    settings = self._plugin_manager.get_plugin_preset_settings(device_name)
+                    if settings:
+                        plugin_settings[device_name] = settings
+
+        pm.set_plugin_settings(plugin_settings)
         pm.save_preset()
 
 
     def _activate_save(self, *rest):
         GLib.idle_add(self._save_row.set_sensitive, True)
+
+
+    def _add_plugin_switches(self) -> None:
+        """Add include switches for active plugin devices."""
+        if not self._plugin_manager:
+            return
+
+        for device_name, panel in self._plugin_manager.get_active_plugins().items():
+            self._add_single_plugin_switch(device_name, panel)
+
+    def _add_single_plugin_switch(self, device_name: str, panel) -> None:
+        """Add a single plugin switch to the include expander."""
+        if device_name in self._plugin_includes:
+            return  # Already added
+
+        row = FoxblatSwitchRow(panel.title)
+        self._include_expander.add_row(row)
+        row.set_value(0)
+        setting_key = f"presets-include-plugin-{device_name}"
+        saved_value = self._settings.read_setting(setting_key)
+        if saved_value is not None:
+            row.set_value(saved_value)
+        row.subscribe(self._settings.write_setting, setting_key)
+        panel.subscribe("active", row.set_active, 0, True)
+        panel.subscribe("active", row.set_present)
+        self._plugin_includes[device_name] = row.get_value
+
+    def _on_plugin_available(self, plugin_name: str, panel) -> None:
+        """Called when a plugin's matching device is connected (from background thread)."""
+        device_name = panel.preset_device_name
+        GLib.idle_add(self._add_single_plugin_switch, device_name, panel)
 
 
     def _load_preset(self, preset_name: str, automatic=False, default=False):
@@ -189,6 +241,12 @@ class PresetSettings(SettingsPanel):
         pm.set_path(self._presets_path)
         pm.set_name(preset_name)
         pm.load_preset(self._hpattern, self._stalks)
+
+        # Load plugin settings from preset
+        if self._plugin_manager:
+            plugin_settings = pm.get_plugin_settings()
+            for device_name, settings in plugin_settings.items():
+                self._plugin_manager.apply_plugin_preset_settings(device_name, settings)
 
         if not automatic and not default:
             return

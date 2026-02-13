@@ -1,0 +1,727 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.lawstorant.foxblat</id>
+
+  <name>Foxblat</name>
+  <summary>Configure Moza Racing hardware</summary>
+
+  <developer id="io.github.lawstorant">
+    <name>Tomasz Pakuła</name>
+  </developer>
+
+  <metadata_license>FSFAP</metadata_license>
+  <project_license>GPL-3.0-only</project_license>
+
+  <recommends>
+    <display_length compare="ge">800</display_length>
+  </recommends>
+
+  <provides>
+    <binary>foxblat</binary>
+  </provides>
+
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+    <control>touch</control>
+  </supports>
+
+  <branding>
+    <color type="primary" scheme_preference="light">#d9f987</color>
+    <color type="primary" scheme_preference="dark">#94b23f</color>
+  </branding>
+
+  <description>
+    <p>
+      Foxblat enables you to change your Moza Racing hardware settings with ease as well
+      as adding SDL/Proton detection fixes for any of your devices (pedals, shifters, handbrakes etc.) from other brands.
+    </p>
+    <p>
+      Settings and their values are a 1:1 match with Pit House. This makes it possible to use presets shared by the community.
+      The table of supported settings compared to Pit House can be found on the project website. This project has no official ties to Moza
+      and/or their software. It's 100% independent work based largely on hours of reverse engineering the protocol.
+    </p>
+    <p>
+      Foxblat supports saving/loading presets and automatic per-game application.
+    </p>
+    <p>
+      If a device misses an axis an/or a button, an automatic game detection fix will be applied. No need for other software/SDL hints to make them work.
+    </p>
+    <p>
+      Supported devices:
+    </p>
+    <ul>
+      <li>Wheelbases</li>
+      <li>Wheels</li>
+      <li>Pedals</li>
+      <li>Handbrake</li>
+      <li>Sequential shifter</li>
+      <li>H-Pattern shifter</li>
+      <li>Multi-function stalks</li>
+      <li>E-Stop</li>
+      <li>Universal Hub</li>
+      <li>Digital Dash v2</li>
+      <li>Generic joysticks (only detection fix)</li>
+    </ul>
+    <p>
+      Note: The udev rules found in the GitHub repository need to be installed for the application to work properly.
+      Foxblat will remind you of this in case of no rw access to the serial devices.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">io.github.lawstorant.foxblat.desktop</launchable>
+
+  <screenshots>
+    <screenshot type="default">
+      <caption>Base settings</caption>
+      <image>https://github.com/Lawstorant/foxblat/raw/main/screens/flathub/base.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Home screen</caption>
+      <image>https://github.com/Lawstorant/foxblat/raw/main/screens/flathub/home.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Wheel settings</caption>
+      <image>https://github.com/Lawstorant/foxblat/raw/main/screens/flathub/wheel.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Pedals settings</caption>
+      <image>https://github.com/Lawstorant/foxblat/raw/main/screens/flathub/pedals.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Sequential shifter settings</caption>
+      <image>https://github.com/Lawstorant/foxblat/raw/main/screens/flathub/sequential.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>H-Pattern settings</caption>
+      <image>https://github.com/Lawstorant/foxblat/raw/main/screens/flathub/hpattern.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Preset screen</caption>
+      <image>https://github.com/Lawstorant/foxblat/raw/main/screens/flathub/presets.png</image>
+    </screenshot>
+  </screenshots>
+
+  <url type="homepage">https://github.com/Lawstorant/foxblat</url>
+  <url type="vcs-browser">https://github.com/Lawstorant/foxblat</url>
+  <url type="bugtracker">https://github.com/Lawstorant/foxblat/issues</url>
+  <url type="donation">https://github.com/sponsors/Lawstorant</url>
+
+  <content_rating type="oars-1.1"/>
+  <update_contact>forest10pl@gmail.com</update_contact>
+
+  <releases>
+    <release version="v1.36.0" date="2026-01-21">
+      <description>
+        <p>Add tray icon via trayer</p>
+      </description>
+    </release>
+    <release version="v1.35.5" date="2026-01-14">
+      <description>
+        <p>Fix for Python 3.14</p>
+      </description>
+    </release>
+    <release version="v1.35.4" date="2026-01-11">
+      <description>
+        <p>Add support for R21 and R25 ultra bases</p>
+      </description>
+    </release>
+    <release version="v1.35.3" date="2025-11-29">
+      <description>
+        <p>Fix detection for ES wheel and wheels with older firmwares</p>
+      </description>
+    </release>
+    <release version="v1.35.2" date="2025-11-22">
+      <description>
+        <p>Allow more furve offset for the first point</p>
+        <p>Hide E-Stop row on the home scren if not detected</p>
+      </description>
+    </release>
+    <release version="v1.35.1" date="2025-11-22">
+      <description>
+        <p>Fix wheel crashes during TSW detection</p>
+      </description>
+    </release>
+    <release version="v1.35.0" date="2025-11-20">
+      <description>
+        <ul>
+          <li>New wheel protocol support (please update firmware)</li>
+          <li>Trim base torque slider to only show usable range</li>
+          <li>Rearrange effect settings to better reflect their importance</li>
+          <li>Add a way to improve ffb around the center of the steering</li>
+        </ul>
+      </description>
+    </release>
+    <release version="v1.34.4" date="2025-08-22">
+      <description>
+        <p>Fix ffb effects gain and ffb interpolation not being saved to presets (again)</p>
+      </description>
+    </release>
+    <release version="v1.34.3" date="2025-08-20">
+      <description>
+        <p>Fix ffb effects gain and ffb interpolation not being saved to presets</p>
+      </description>
+    </release>
+    <release version="v1.34.2" date="2025-07-13">
+      <description>
+        <p>
+          New compatiblity mode added to multifunction stalks that allows users to transform
+          rear wiper controls into ignition and starter switch. The on/off position is now
+          tracked and button inputs are only sent when it actually changes + the buttons are
+          now combined into just one.
+        </p>
+        <p>
+          The button doesn't fire again after toggling the momentary switch, normally used for
+          rear windshield washer, so the whole thing can be used the same as a real ignition.
+          Tested with Truck Simlators and ACC.
+        </p>
+      </description>
+    </release>
+    <release version="v1.34.1" date="2025-07-12">
+      <description>
+        <p>Small change to the stalks naming after detection fix</p>
+      </description>
+    </release>
+    <release version="v1.34.0" date="2025-07-07">
+      <description>
+        <ul>
+          <li>Startup music settings from beta base firmware</li>
+          <li>Add setting to load default preset on application startup</li>
+          <li>Add reset button to all devices. This will restore default values to all settings</li>
+          <li>Add skipping "positional" light stage for games that only have on/off headlights</li>
+        </ul>
+      </description>
+    </release>
+    <release version="v1.33.0" date="2025-07-06">
+      <description>
+        <p>Some new features</p>
+        <ul>
+          <li>Sequential paddle sync even with USB/Hub connection</li>
+          <li>Add default preset functionality</li>
+          <li>Allow users to disable detection fix for Moza devices</li>
+          <li>Move "Other" settings panel to the end of the sidebar</li>
+        </ul>
+      </description>
+    </release>
+    <release version="v1.32.1" date="2025-06-09">
+      <description>
+        <p>Fix: unhide Generic Devices panel</p>
+      </description>
+    </release>
+    <release version="v1.32.0" date="2025-06-08">
+      <description>
+        <p>Include H-Pattern shifter in presets</p>
+        <p>Include Multifunction Stalks in presets</p>
+        <p>Hide inactive device buttons in the sidebar</p>
+      </description>
+    </release>
+    <release version="v1.31.0" date="2025-05-22">
+      <description>
+        <p>Improve generic devices detection fix</p>
+        <p>Allow ignoring buttons/axes in generic devices</p>
+        <p>Translate gamepad range buttons to joystick range</p>
+      </description>
+    </release>
+    <release version="v1.30.0" date="2025-04-15">
+      <description>
+        <p>Add support for game effect gain (firmware 1.2.5.5)</p>
+      </description>
+    </release>
+    <release version="v1.29.2" date="2025-04-07">
+      <description>
+        <p>Option to sync wheel and dash settings if both are present</p>
+      </description>
+    </release>
+    <release version="v1.29.1" date="2025-04-04">
+      <description>
+        <p>Some fixes:</p>
+        <ul>
+          <li>Support 4 additional button colors on TSW wheel</li>
+          <li>Reduce spam with rpm blink color commands</li>
+          <li>Try to reduce device disconnection false-positives</li>
+        </ul>
+      </description>
+    </release>
+    <release version="v1.29.0" date="2025-04-04">
+      <description>
+        <p>Initial Dash CM2 support</p>
+      </description>
+    </release>
+    <release version="v1.28.6" date="2025-04-01">
+      <description>
+        <p>HGP detection fix (for real)</p>
+        <p>Universal hub detection fix</p>
+      </description>
+    </release>
+    <release version="v1.28.5" date="2025-03-31">
+      <description>
+        <p>HGP detection fix</p>
+      </description>
+    </release>
+    <release version="v1.28.4" date="2025-03-07">
+      <description>
+        <p>Udev rules update</p>
+      </description>
+    </release>
+    <release version="v1.28.3" date="2025-02-27">
+      <description>
+        <p>Don't remove settings of not available devices from presets</p>
+      </description>
+    </release>
+    <release version="v1.28.2" date="2025-02-21">
+      <description>
+        <p>Fix detection fix for devices without buttons</p>
+      </description>
+    </release>
+    <release version="v1.28.1" date="2025-02-21">
+      <description>
+        <p>Support for detection fox for generic gamepads, not only joysticks.</p>
+      </description>
+    </release>
+    <release version="v1.28.0" date="2025-02-15">
+      <description>
+        <p>Ability to setup detection fix for any joystick device. No need to run protopedal etc.</p>
+        <p>New icon thanks to Philipp Kosarev!</p>
+        <p>Thank you jay0woo for supporting Foxblat</p>
+      </description>
+    </release>
+    <release version="v1.27.4" date="2025-02-3">
+      <description>
+        <p>Add new turn signal compatibility mode - hold</p>
+        <p>This keeps the button pressed as long as turn signal is active</p>
+        <p>Huge thanks to Mon-Ouie for providing this!</p>
+      </description>
+    </release>
+    <release version="v1.27.3" date="2025-01-20">
+      <description>
+        <p>Improve turn signal compatibility robustness</p>
+      </description>
+    </release>
+    <release version="v1.27.2" date="2025-01-19">
+      <description>
+        <p>Fix wheel paddles calibration</p>
+      </description>
+    </release>
+    <release version="v1.27.1" date="2025-01-18">
+      <description>
+        <p>More compatibility modes for Multi-function stalks</p>
+        <ul>
+          <li>Headlights compatibility mode</li>
+          <li>Wipers compatibility modes</li>
+          <li>Quick wipe emulation</li>
+        </ul>
+      </description>
+    </release>
+    <release version="v1.27.0" date="2025-01-17">
+      <description>
+        <p>Add support for Multi-function stalks</p>
+        <p>Compatibility mode for games without cancel binding</p>
+      </description>
+    </release>
+    <release version="v1.26.0" date="2025-01-14">
+      <description>
+        <p>Support new FFB Interpolation setting</p>
+      </description>
+    </release>
+    <release version="v1.25.4" date="2024-12-27">
+      <description>
+        <p>Fix button numbering above the joystick range</p>
+      </description>
+    </release>
+    <release version="v1.25.3" date="2024-11-20">
+      <description>
+        <p>Fix shifter detection with newest firmware</p>
+      </description>
+    </release>
+    <release version="v1.25.2" date="2024-11-13">
+      <description>
+        <p>Save window size when closed</p>
+      </description>
+    </release>
+    <release version="v1.25.1" date="2024-11-13">
+      <description>
+        <p>Keep the linked process while overwriting a preset</p>
+      </description>
+    </release>
+    <release version="v1.25.0" date="2024-11-11">
+      <description>
+        <p>Add support for Universal Hub</p>
+      </description>
+    </release>
+    <release version="v1.24.4" date="2024-11-7">
+      <description>
+        <p>Add support for CRP2 pedals</p>
+      </description>
+    </release>
+    <release version="v1.24.3" date="2024-11-7">
+      <description>
+        <p>Fix axis data</p>
+      </description>
+    </release>
+    <release version="v1.24.2" date="2024-11-7">
+      <description>
+        <ul>
+          <li>Show current gear in H-Pattern settings</li>
+          <li>Fix silent device disconnections</li>
+          <li>Fix device disconnections when waking up from sleep</li>
+        </ul>
+      </description>
+    </release>
+    <release version="v1.24.1" date="2024-11-5">
+      <description>
+        <p>Fix mangled udev code...</p>
+      </description>
+    </release>
+    <release version="v1.24.0" date="2024-11-4">
+      <description>
+        <p>H-Pattern downshift throttle blip operational</p>
+        <ul>
+          <li>HID Handler can inject throttle events into base and pedals</li>
+          <li>Background mode improvements</li>
+          <li>Install udev rules for convinience if pkexec found</li>
+          <li>Autostart improvements</li>
+          <li>Notify about running in te background when background used for the first time</li>
+        </ul>
+      </description>
+    </release>
+    <release version="v1.23.2" date="2024-11-4">
+      <description>
+        <p>Install udev rules for convinience if pkexec found</p>
+      </description>
+    </release>
+    <release version="v1.23.1" date="2024-11-4">
+      <description>
+        <p>Fix missing udev rules detection</p>
+      </description>
+    </release>
+    <release version="v1.23.0" date="2024-11-3">
+      <description>
+        <ul>
+          <li>Support running in background</li>
+          <li>Add option to add application to autostart (works on both native and flatpak installations)</li>
+          <li>Add option to hide application when autostarted</li>
+          <li>Push system notification when autoloading a preset</li>
+        </ul>
+      </description>
+    </release>
+    <release version="v1.22.3" date="2024-11-1">
+      <description>
+        <ul>
+          <li>Automatic game detection fix for shifters and handbrakes</li>
+          <li>Fixes R3 base detection and improved pedals detection</li>
+        </ul>
+      </description>
+    </release>
+    <release version="v1.22.2" date="2024-10-30">
+      <description>
+        <p>Fix flatpak process listing</p>
+      </description>
+    </release>
+    <release version="v1.22.1" date="2024-10-29">
+      <description>
+        <p>Process listing now works under flatpak. Automatic preset loading possible.</p>
+      </description>
+    </release>
+    <release version="v1.22.0" date="2024-10-27">
+      <description>
+        <p>Automatic, per-game preset loading</p>
+        <ul>
+          <li>New preset settings dialog</li>
+          <li>Running process selector</li>
+          <li>Preset rename support</li>
+        </ul>
+      </description>
+    </release>
+    <release version="v1.21.0" date="2024-10-25">
+      <description>
+        <ul>
+          <li>E-Stop support</li>
+          <li>E-Stop USB support</li>
+        </ul>
+      </description>
+    </release>
+    <release version="v1.20.1" date="2024-10-14">
+      <description>
+        <ul>
+          <li>Visual Improvements to Adw.Banner placing</li>
+          <li>Dialogs are now anchored to the application window</li>
+          <li>Fix empty preset panel content width</li>
+        </ul>
+      </description>
+    </release>
+    <release version="v1.20.1" date="2024-10-14">
+      <description>
+        <p>
+          Default brake calibration state fixup
+        </p>
+      </description>
+    </release>
+    <release version="v1.20.0" date="2024-10-14">
+      <description>
+        <p>
+          This release introduces persistent settings. These include:
+        </p>
+        <ul>
+          <li>H-Pattern blip settings</li>
+          <li>HID refresh rate setting</li>
+          <li>Brake calibration active state</li>
+          <li>Devices included in new presets</li>
+          <li>Wheel RPM blinking colors</li>
+        </ul>
+      </description>
+    </release>
+    <release version="v1.19.7" date="2024-10-12">
+      <description>
+        <p>
+          This update should fix even more woes with the ES wheel detection.
+          Kudos to GitHub user TimSchmock who helped massively wit hthe debugging
+          as I do not own the ES wheel myself (or a few other Moza devices)
+        </p>
+        <p>
+          Huge thanks to GitHub user pseudex for supporting this project!
+          I'm getting closer to being able to actually buy Moza Universal hub and support it.
+        </p>
+      </description>
+    </release>
+    <release version="v1.19.6" date="2024-10-07">
+      <description>
+        <p>Visual update</p>
+        <ul>
+          <li>Improved look and feel</li>
+          <li>Improved type hints</li>
+          <li>Added copyright notices</li>
+        </ul>
+      </description>
+    </release>
+    <release version="v1.19.5" date="2024-10-06">
+      <description>
+        <p>Major rewrite pt.2</p>
+        <ul>
+          <li>Fixed pedals calibration (apparently, this was borked for a long time)</li>
+          <li>Asynchronous serial I/O</li>
+          <li>Every serial device gets it's own I/O process</li>
+          <li>Exclusive access mode for get/set commands</li>
+          <li>Subscribtions can now be only single-shot</li>
+          <li>BlockingValue class enables waiting for value read</li>
+          <li>Discover commands from received data</li>
+        </ul>
+      </description>
+    </release>
+    <release version="v1.19.4" date="2024-10-03">
+      <description>
+        <p>Reduce disconnection false-positives before serial connection rewrite</p>
+      </description>
+    </release>
+    <release version="v1.19.3" date="2024-10-03">
+      <description>
+        <ul>
+          <li>Fix reading 0 values</li>
+          <li>Update Natural inertia marks</li>
+        </ul>
+      </description>
+    </release>
+    <release version="v1.19.1" date="2024-10-02">
+      <description>
+        <p>Fix data polling</p>
+      </description>
+    </release>
+    <release version="v1.19.0" date="2024-10-01">
+      <description>
+        <p>Major rewrite pt.1. No user-facing changes :/ Maybe less crashing</p>
+        <ul>
+          <li>Unified event handling through new classes Subscription, SubscriptionList, EventDispatcher, Observable etc.</li>
+          <li>Make sure everything is updated through idle_add</li>
+          <li>Cutting spaghetti from connection manager. No more per-type setters/getters</li>
+          <li>Consume command queue in real time to enable faster writes to devices</li>
+          <li>MozaCommands now handles type conversion automatically</li>
+          <li>Use more Events/Locks instead of boolean values</li>
+          <li>Create Threads on demand instead of keeping them alive with loops and sleep()</li>
+          <li>Remove all "None" return type hints</li>
+          <li>RPM/Button color picker row is now sized more universally</li>
+          <li>Custom commands are now accessible with "--custom" launch flag</li>
+          <li>Instant curve preset application</li>
+        </ul>
+      </description>
+    </release>
+    <release version="v1.18.5" date="2024-09-28">
+      <description>
+        <ul>
+          <li>Fix level bar flickering</li>
+          <li>Fix HID-related crashes when connecting devices without any axes</li>
+        </ul>
+      </description>
+    </release>
+    <release version="v1.18.4" date="2024-09-22">
+      <description>
+        <p>Usage and compatibility fixes</p>
+      </description>
+    </release>
+    <release version="v1.18.3" date="2024-09-22">
+      <description>
+        <ul>
+          <li>Fixed Min/Max buttons and setting ranges on home screen</li>
+          <li>Set fuzz/flat values on connected devices to enable smoother input</li>
+          <li>libadwaita 1.6 compatibility for older OSes</li>
+        </ul>
+      </description>
+    </release>
+    <release version="v1.18.2" date="2024-09-22">
+      <description>
+        <p>
+          Hid handler now automatically applies offset to axes that have min lower than 0.
+          This fixes issues with firmwares that change the min/max values of some axes.
+        </p>
+      </description>
+    </release>
+    <release version="v1.18.1" date="2024-09-22">
+      <description>
+        <p>Added 2520 mark to the rotation slider</p>
+      </description>
+    </release>
+    <release version="v1.18.0" date="2024-09-21">
+      <description>
+        <ul>
+          <li>Min/Max buttons on the home screen for Pedals and Handbrake</li>
+          <li>Handbrake input level on the home screen</li>
+          <li>Bump Gnome platform to version 47</li>
+          <li>Update button apperance</li>
+          <li>Use standrad Gnome way of linking widgets</li>
+          <li>Update slider row paddings to center it and make it a little bit shorter</li>
+        </ul>
+      </description>
+    </release>
+    <release version="v1.17.4" date="2024-09-18">
+      <description>
+        <ul>
+          <li>Color picker row will now blink selected button</li>
+          <li>Fixes to color picker row apperance</li>
+          <li>Fixes to Wheel detection</li>
+          <li>Additional devices selecatable in presets</li>
+        </ul>
+      </description>
+    </release>
+    <release version="v1.17.2" date="2024-09-16">
+      <description>
+        <ul>
+          <li>Preset saving/loading</li>
+          <li>Remove some lingering text strings from preset rows</li>
+          <li>Fix crashes related to reloading presets view</li>
+        </ul>
+      </description>
+    </release>
+    <release version="v1.17.0" date="2024-09-16">
+      <description>
+        <ul>
+          <li>Preset saving/loading</li>
+        </ul>
+      </description>
+    </release>
+    <release version="v1.16.4" date="2024-09-06">
+      <description>
+        <ul>
+          <li>Modify how hid handler notifies subscribers</li>
+        </ul>
+      </description>
+    </release>
+    <release version="v1.16.3" date="2024-09-06">
+      <description>
+        <ul>
+          <li>Deactivete some wheel settings on ES wheel</li>
+        </ul>
+      </description>
+    </release>
+    <release version="v1.16.1" date="2024-09-06">
+      <description>
+        <ul>
+          <li>Wheel paddles level bars improvements</li>
+        </ul>
+      </description>
+    </release>
+    <release version="v1.16.0" date="2024-09-05">
+      <description>
+        <ul>
+          <li>Improved home page</li>
+          <li>Axis data from HID events</li>
+        </ul>
+      </description>
+    </release>
+    <release version="v1.15.0" date="2024-08-29">
+      <description>
+        <p>Support for FFB 3.0 FW settings</p>
+        <p>Show wheelbase temperatures</p>
+        <p>Reorder misc settings</p>
+      </description>
+    </release>
+    <release version="v1.14.3" date="2024-08-21">
+      <description>
+        <p>Fix color picker row</p>
+      </description>
+    </release>
+    <release version="v1.14.2" date="2024-08-19">
+      <description>
+        <p>Fix calibration functionality</p>
+      </description>
+    </release>
+    <release version="v1.14.0" date="2024-08-18">
+      <description>
+        <p>Improve device detection. More steering wheels supported.</p>
+      </description>
+    </release>
+    <release version="v1.13.4" date="2024-08-17">
+      <description>
+        <p>Change the wheel detection command</p>
+      </description>
+    </release>
+    <release version="v1.13.2" date="2024-08-15">
+      <description>
+        <p>Fix possible RPM color mangling</p>
+        <p>Improve description of brake sensor ratio setting</p>
+      </description>
+    </release>
+    <release version="v1.13.0" date="2024-08-14">
+      <description>
+        <p>New functionality:</p>
+        <ul>
+          <li>Add RPM LED test to Other settings page</li>
+          <li>Fix the settings wobblines by setting a cooldown</li>
+          <li>Improve the speed of the serial connection</li>
+        </ul>
+      </description>
+    </release>
+    <release version="v1.12.0" date="2024-08-12">
+      <description>
+        <p>Add Key Combination settings to the Wheel page</p>
+      </description>
+    </release>
+    <release version="v1.11.1" date="2024-08-12">
+      <description>
+        <p>Overhaul the header apperance</p>
+      </description>
+    </release>
+    <release version="v1.11.0" date="2024-08-05">
+      <description>
+        <p>Support wheel firmware 1.2.2.7</p>
+      </description>
+    </release>
+    <release version="v1.10.5" date="2024-08-03">
+      <description>
+        <p>Added scalable icon</p>
+      </description>
+    </release>
+    <release version="v1.10.4" date="2024-08-03">
+      <description>
+        <p>Updated info and metadata per Flathub guidelines</p>
+      </description>
+    </release>
+    <release version="v1.10.3" date="2024-07-31">
+      <description>
+        <p>Improve missing udev rules detection</p>
+      </description>
+    </release>
+    <release version="v1.10.1" date="2024-07-31">
+      <description>
+        <p>Initial flatpak version</p>
+      </description>
+    </release>
+  </releases>
+</component>

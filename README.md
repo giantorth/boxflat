@@ -1,11 +1,11 @@
-# Boxflat
-Boxflat for Moza Racing. Control your Moza gear settings... and more!
+# Foxblat
+Foxblat for Moza Racing. Control your Moza gear settings... and more!
+
+This is a fork of the excellent [Boxflat by Lawstorant](https://github.com/Lawstorant/boxflat).  If you enjoy this project, please [sponsor](https://github.com/sponsors/Lawstorant) the original author of this program.
 
 <img alt="Wheelbase panel" src="screens/base.png">
 
-<a href="https://flathub.org/apps/io.github.lawstorant.boxflat">
-    <img alt="Get it on Flathub" src="https://flathub.org/api/badge?locale=en"/>
-</a>
+Flatpack coming soon 
 
 > [!NOTE]
 > [Sim Racing On Linux](https://simracingonlinux.com/)
@@ -20,64 +20,45 @@ Boxflat for Moza Racing. Control your Moza gear settings... and more!
 
 ## Functionality
 
-| Device          | Completeness  | WIP |
-| :-------------: | :-----------: | :-- |
-| Home page       | 100%          | |
-| Base            | 100%          | |
-| Wheel           | 100%          | |
-| Pedals          | 100%          | |
-| Dashboard       | LED control   | Display Settings |
-| Universal Hub   | 100%          | |
-| H-Pattern       | 100%          | |
-| Sequential      | 100%          | |
-| Handbrake       | 100%          | |
-| E-Stop          | 100%          | |
-| Stalks          | 100%          | |
-| Other settings  | 100%          | |
-| Presets         | 100%          | |
-| Generic devices | Detection fix | |
-
-### Preset Auto-Loading
-Presets can automatically load when specific games are detected. The system now supports full command-line pattern matching, allowing you to distinguish between games from the same publisher (e.g., different EA games that all launch through `EADesktop.exe`). Patterns can be simple process names or command-line substrings for precise matching.
-
-### Ideas
-- Telemetry ingestion through REST API/WebSockets
-- Cammus support
-- PXN Support
-- Simagic support
-- H-Pattern and Sequential settings available for arbitrary HID devices
+Foxblat provides the following additional features:
+* Telemetry support via Simd/SimAPI: https://github.com/Spacefreak18/simapi
+* Presets can be saved on extended paths, not limited to process name only
+* Presets can be saved by vehicle (When simd is running)
+* Plugins are supported, read more [here](plugins/READMED.md)
+  * An example plugin for the Aliexpress GX-100 shifter is included, linux users need [this driver](https://github.com/JacKeTUs/hid-gx100-shifter)
 
 ### Firmware upgrades
-There are some EEPROM functions available, but I need to do more testing to make sure I won't brick anything. For now, just use Pit House on Windows if you can, as FW upgrade support is not coming in the near future.
+Not supported at this time.
 
 ## Compatibility
 Moza commands and their protocol is hardware agnostic, so any implemented feature should work with any wheelbase, wheel, pedal set etc. Some Wheel settings are device-specific (FSR Wheel dashboard for example)
 
 Wheel indicator blinking colors can't be read from the wheel. This is a limitation of the current firmware.
 
-Boxflat automatically detects is a device (shifter/pedals) needs a detection fix and creates a proper virutal device. This fixes game detection.
+Foxblat automatically detects is a device (shifter/pedals) needs a detection fix and creates a proper virutal device. This fixes game detection.
 
 > [!TIP]
 > Detection fix can be applied to any HID device as well (pedals, shifters, button boxes).
 
 # Installation
-## Flatpak (preferred method)
-Boxflat is available on **[Flathub](https://flathub.org/apps/io.github.lawstorant.boxflat)**
 
 ### Udev rule installation for flatpak
 Copy this into terminal and execute with root permissions
 ```bash
-sudo tee /etc/udev/rules.d/99-boxflat.rules <<< 'SUBSYSTEM=="tty", KERNEL=="ttyACM*", ATTRS{idVendor}=="346e", ACTION=="add", MODE="0666", TAG+="uaccess"'
+sudo tee /etc/udev/rules.d/99-foxblat.rules <<< 'SUBSYSTEM=="tty", KERNEL=="ttyACM*", ATTRS{idVendor}=="346e", ACTION=="add", MODE="0666", TAG+="uaccess"'
 ```
 
 > [!IMPORTANT]
 > Unplug and plug in your deivce to trigger these new rules. Alternatively, you can reboot your system.
 
+## Flatpack
+Coming Soon
+
 ## Arch Linux:
-https://aur.archlinux.org/packages/boxflat-git
+Coming soon
 
 ## Void Linux:
-`xbps-install -S boxflat`
+Coming soon 
 
 ## Manual:
 This package depends on:
@@ -109,8 +90,8 @@ Installation:
 ```bash
 # Run `install.sh` with root permissions.
 $ sudo ./install.sh
-# Application will be installed as `boxflat`
-$ boxflat
+# Application will be installed as `foxblat`
+$ foxblat
 ```
 Removal:
 ```bash
@@ -123,7 +104,7 @@ Below are some common problems and possible solutions:
 - `Error getting authority` when adding/updating the udev rules: make sure
   the `dbus` service is running
 - Wheelbase does not appear, `dmesg` shows it connecting and getting assigned
-  an USB device, but it doesn't show up in boxflat -- check the `/dev` folder
+  an USB device, but it doesn't show up in foxblat -- check the `/dev` folder
   with `ls /dev/ttyACM*`, if there is nothing you might be missing the
   `CDC ACM` serial driver in the kernel
 - There is no FFB - if your torque is up to 100%, try turning it down to 95%
@@ -143,11 +124,7 @@ Below are some common problems and possible solutions:
 <img alt="Presets panel" src="screens/presets.png">
 
 ## Supporters
-I give my heartfelt THANK YOU to every supporter who felt like this was worth a little to spare. Special thanks go to:
-- [@abowen](https://github.com/abowen)
-- [@SkaterPaul](https://github.com/SkaterPaul)
-- [@m4tx](https://github.com/m4tx)
-- [@TylerCode](https://github.com/TylerCode)
-- [@Petjes-je](https://github.com/Petjes-je)
 
-**© 2025 Tomasz Pakuła Using Arch BTW**
+If you enjoy this project, please [sponsor](https://github.com/sponsors/Lawstorant) the original author of this program.
+
+**Original Boxflat © 2025 Tomasz Pakuła Using Arch BTW**

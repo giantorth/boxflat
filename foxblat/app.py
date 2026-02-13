@@ -1,0 +1,435 @@
+# Copyright (c) 2025, Tomasz Pakuła Using Arch BTW
+
+import gi
+gi.require_version('Gtk', '4.0')
+gi.require_version('Adw', '1')
+
+
+from gi.repository import Gtk, Gdk, Adw, GLib
+from foxblat.panels import *
+from foxblat.connection_manager import MozaConnectionManager
+from foxblat.hid_handler import HidHandler
+from foxblat.settings_handler import SettingsHandler
+from foxblat.simapi_handler import SimApiHandler
+from foxblat.ipc_handler import IpcHandler
+from foxblat.plugin_manager import PluginManager
+from threading import Thread, Event
+
+import os
+import subprocess
+
+class MainWindow(Adw.ApplicationWindow):
+    def __init__(self, navigation: Adw.NavigationSplitView, settings: SettingsHandler):
+        super().__init__()
+        self.set_title("Foxblat")
+        self.set_content(navigation)
+        self._data_path = None
+        self._spawn = ["flatpak-spawn", "--host"]
+        self._settings: SettingsHandler = settings
+
+
+    def check_udev(self, data_path: str) -> None:
+        self._data_path = data_path
+        udev_exists = self._check_native
+        is_flatpak = False
+        rules_version = self._settings.read_setting("rules-version") or 0
+
+        if os.environ["FOXBLAT_FLATPAK_EDITION"] == "true":
+            is_flatpak = True
+            udev_exists = self._check_flatpak
+
+        udev_exists = udev_exists()
+
+        if udev_exists and rules_version >= 2:
+            return
+
+        pkexec_found = self._check_pkexec(is_flatpak)
+
+        udev_alert_body = "alert"
+        install_button_label = "Install"
+        if not udev_exists:
+            with open(os.path.join(data_path, "udev-warning-install.txt" if pkexec_found else "udev-warning-guide.txt"), "r") as file:
+                udev_alert_body = "\n" + file.read().strip()
+
+        else:
+            udev_alert_body = "\nFoxblat needs to update udev rules.\n"
+            udev_alert_body += "Restart your PC if you encounter any issues with detection fixes.\n"
+            install_button_label = "Update"
+
+        alert = Adw.AlertDialog()
+        alert.set_body(udev_alert_body)
+
+        if pkexec_found:
+            alert.add_response("install", install_button_label)
+            alert.set_response_appearance("install", Adw.ResponseAppearance.SUGGESTED)
+
+        else:
+            alert.add_response("guide", "Guide")
+            alert.set_response_appearance("guide", Adw.ResponseAppearance.SUGGESTED)
+
+        alert.add_response("close", "Close")
+        alert.set_size_request(460, 0)
+
+        alert.set_response_appearance("close", Adw.ResponseAppearance.DESTRUCTIVE)
+        alert.set_close_response("close")
+
+        if not udev_exists:
+            alert.set_heading("No udev rules detected!")
+        else:
+            alert.set_heading("Rules update")
+
+        alert.set_body_use_markup(True)
+        alert.connect("response", self._handle_udev_dialog, is_flatpak)
+
+        alert.choose(self)
+
+
+    def _check_native(self) -> bool:
+        return os.path.isfile("/etc/udev/rules.d/99-boxflat.rules") or os.path.isfile("/usr/lib/udev/rules.d/99-boxflat.rules") or os.path.isfile("/etc/udev/rules.d/99-foxblat.rules") or os.path.isfile("/usr/lib/udev/rules.d/99-foxblat.rules")
+
+
+    def _check_flatpak(self) -> bool:
+        command = [*self._spawn, "ls" ,"/etc/udev/rules.d"]
+        rules = subprocess.check_output(command).decode()
+
+        if "99-boxflat.rules" in rules or "99-foxblat.rules" in rules:
+            return True
+        return False
+
+
+    def _handle_udev_dialog(self, dialog, response: str, is_flatpak: bool) -> None:
+        if response == "install":
+            Thread(target=self._install_rules, args=[is_flatpak], daemon=True).start()
+
+        elif response == "guide":
+            url = "https://github.com/Lawstorant/foxblat?tab=readme-ov-file#udev-rule-installation-for-flatpak"
+            Gtk.UriLauncher(uri=url).launch()
+            self._settings.write_setting(2, "rules-version")
+
+
+    def _install_rules(self, is_flatpak: bool) -> None:
+        with open(os.path.join(self._data_path, "../udev/99-foxblat.rules"), "r") as file:
+            udev = file.read().strip()
+
+        command = ["pkexec", "tee", "/etc/udev/rules.d/99-foxblat.rules"]
+        if is_flatpak:
+            command = [*self._spawn, *command]
+
+        echo = subprocess.Popen(["echo", udev], stdout=subprocess.PIPE)
+        if not subprocess.call(command, stdin=echo.stdout):
+            self._settings.write_setting(2, "rules-version")
+
+
+    def _check_pkexec(self, is_flatpak: bool) -> bool:
+        command = ["whereis", "-b", "pkexec"]
+        if is_flatpak:
+            command = [*self._spawn, *command]
+
+        version = subprocess.check_output(command).decode().strip().split()
+
+        if len(version) > 1:
+            return True
+        return False
+
+
+
+class MyApp(Adw.Application):
+    def __init__(self, data_path: str, config_path: str, dry_run: bool, custom: bool, autostart: bool,**kwargs):
+        super().__init__(**kwargs)
+        self.connect('activate', self.on_activate)
+        self.connect('shutdown', self._shutdown)
+
+        self.Tray = None
+        self._css_loaded = False
+
+        self._settings = SettingsHandler(config_path)
+        if self._settings.read_setting("moza-detection-fix-enabled") is None:
+            self._settings.write_setting(1, "moza-detection-fix-enabled")
+
+        self._hid_handler = HidHandler()
+        self._hid_handler.set_detection_fix_enabled(self._settings.read_setting("moza-detection-fix-enabled"))
+
+        self._simapi_handler = SimApiHandler()
+
+        self._config_path = config_path
+        self._data_path = data_path
+        self._held = Event()
+
+        self._cm = MozaConnectionManager(os.path.join(data_path, "serial.yml"), dry_run)
+        self._cm.subscribe("hid-device-connected", self._hid_handler.add_device)
+        self._cm.subscribe("hid-device-disconnected", self._hid_handler.remove_device)
+        self._simapi_handler.set_connection_manager(self._cm)
+
+        self._plugin_manager = PluginManager(config_path, self._hid_handler, self._settings)
+
+        self._ipc_handler = IpcHandler(self._cm, self._settings)
+        if not dry_run:
+            self._ipc_handler.start()
+
+        with open(os.path.join(data_path, "version"), "r") as version:
+            self._version = version.readline().strip()
+
+        self._panels: dict[str, SettingsPanel] = {}
+        self._dry_run = dry_run
+        self._autostart = autostart
+
+        navigation = Adw.NavigationSplitView()
+        navigation.set_max_sidebar_width(200)
+        navigation.set_min_sidebar_width(200)
+
+        box2 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self._sidebar_box = box2  # Store reference for plugin panel buttons
+
+        left = Adw.ToolbarView()
+        left.add_top_bar(Adw.HeaderBar())
+        left.set_content(box2)
+
+        sidebar = Adw.NavigationPage()
+        sidebar.set_title("Foxblat")
+        sidebar.set_child(left)
+
+        navigation.set_sidebar(sidebar)
+        navigation.set_content(Adw.NavigationPage(title="whatever"))
+
+        self.navigation = navigation
+
+        self._prepare_settings()
+        if custom:
+            self._panels["Other"].enable_custom_commands()
+
+        buttons = self._panel_buttons()
+        for button in buttons:
+            if button is not buttons[0]:
+                button.set_group(buttons[0])
+            box2.append(button)
+
+        navigation.set_content(self._activate_default().content)
+
+        self._cm.subscribe("estop-receive-status", self._cm.set_setting, "base-ffb-disable")
+
+
+    def hold(self) -> None:
+        if self._held.is_set():
+            return
+
+        self._held.set()
+        super().hold()
+
+
+    def release(self) -> None:
+        if not self._held.is_set():
+            return
+
+        self._held.clear()
+        super().release()
+
+
+    def on_activate(self, app):
+        if not self._css_loaded:
+            css_provider = Gtk.CssProvider()
+            css_provider.load_from_path(f"{self._data_path}/style.css")
+            Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+            self._css_loaded = True
+
+        autostart = self._autostart
+        self._autostart = False
+
+        hidden = self._settings.read_setting("autostart-hidden") or 0
+        background = self._settings.read_setting("background") or 0
+
+        if background:
+            self.hold()
+
+        if autostart and hidden and background:
+            return
+
+        if self.navigation.get_root() != None:
+            return
+
+        win = MainWindow(self.navigation, self._settings)
+        win.set_application(app)
+        win.connect("close-request", lambda *_: Thread(target=self._show_bg_notification, daemon=True).start())
+        win.connect("close-request", self._save_window_info)
+
+        win.present()
+        win.check_udev(self._data_path)
+
+        saved_state = self._settings.read_setting("window_state")
+
+        if not saved_state:
+            win.set_default_size(0, 850)
+            return
+
+        win.set_default_size(saved_state["width"], saved_state["height"])
+        if saved_state["maximized"]:
+            win.maximize()
+
+        if saved_state["fullscreen"]:
+            win.fullscreen()
+
+
+    def _save_window_info(self, window: Adw.ApplicationWindow) -> None:
+        self._settings.write_setting({
+            "width"      : window.get_default_size().width,
+            "height"     : window.get_default_size().height,
+            "maximized"  : window.is_maximized(),
+            "fullscreen" : window.is_fullscreen()
+        }, "window_state")
+
+
+    def _show_bg_notification(self, *_) -> None:
+        if self._settings.read_setting("background-notified") == 1:
+            return
+
+        if not self._settings.read_setting("background"):
+            return
+
+        self._settings.write_setting(1, "background-notified")
+        notif = Notification()
+
+        notif.set_title(f"Running in the background")
+        notif.set_body(f"You can disable this behavior in Other settings")
+        notif.set_priority(NotificationPriority.NORMAL)
+
+        self.send_notification("background", notif)
+        sleep(10)
+        self.withdraw_notification("background")
+
+
+    def switch_panel(self, button):
+        new_title = button.get_child().get_label()
+        new_content = self._panels[new_title].content
+
+        if self.navigation.get_content() == new_content:
+            return
+
+        self.navigation.set_content(new_content)
+
+
+    def set_content_title(self, title: str):
+        self.navigation.get_content().set_title(title)
+
+
+    def _prepare_settings(self):
+        self._panels["Home"] = HomeSettings(self.switch_panel, self._dry_run, self._cm, self._hid_handler, self._version)
+        self._panels["Base"] = BaseSettings(self.switch_panel, self._cm, self._hid_handler)
+        self._panels["Dash"] = DashSettings(self.switch_panel, self._cm, self._hid_handler, self._settings)
+        self._panels["Wheel"] = WheelSettings(self.switch_panel, self._cm, self._hid_handler, self._settings)
+        self._panels["Wheel Old"] = OldWheelSettings(self.switch_panel, self._cm, self._hid_handler, self._settings)
+        self._panels["Pedals"] = PedalsSettings(self.switch_panel, self._cm, self._hid_handler)
+        self._panels["H-Pattern Shifter"] = HPatternSettings(self.switch_panel, self._cm, self._settings, self._hid_handler)
+        self._panels["Sequential Shifter"] = SequentialSettings(self.switch_panel, self._cm, self._hid_handler)
+        self._panels["Handbrake"] = HandbrakeSettings(self.switch_panel, self._cm, self._hid_handler)
+        self._panels["Multifunction Stalks"] = StalksSettings(self.switch_panel, self._cm, self._hid_handler, self._settings)
+        self._panels["Universal Hub"] = HubSettings(self.switch_panel, self._cm)
+
+        # Start plugin manager and load plugin panels
+        # Subscribe to dynamic plugin panel events (for devices connected after startup)
+        self._plugin_manager.subscribe("plugin-panel-available", self._on_plugin_panel_available)
+        self._plugin_manager.start()
+        self._load_plugin_panels()
+
+        self._panels["Presets"] = PresetSettings(self.switch_panel, self._cm, self._settings, self._panels["H-Pattern Shifter"], self._panels["Multifunction Stalks"], self._simapi_handler, self._plugin_manager)
+        self._panels["Presets"].set_application(self)
+
+        # Subscribe preset panel to IPC preset load events
+        subscription = self._ipc_handler.subscribe("preset-loaded", self._panels["Presets"].update_preset_name)
+        print(f"[APP] Subscribed to preset-loaded event: {subscription}")
+        self._panels["Generic Devices"] = GenericSettings(self.switch_panel, self._settings)
+        self._panels["Telemetry"] = TelemetrySettings(
+            self.switch_panel, self._cm, self._hid_handler, self._settings, self._simapi_handler)
+
+        self._panels["Other"] = OtherSettings(
+            self.switch_panel, self._cm, self._hid_handler, self._settings, self._version, self, self._data_path)
+
+        self._panels["Other"].subscribe("brake-calibration-enabled", self._panels["Pedals"].set_brake_calibration_active)
+        self._panels["Pedals"].set_brake_calibration_active(self._panels["Other"].get_brake_valibration_enabled())
+
+        for panel in self._panels.values():
+            panel.active(-2)
+
+        self._panels["Home"].active(1)
+        self._panels["Other"].active(1)
+        self._panels["Presets"].active(1)
+        self._panels["Generic Devices"].active(1)
+
+        if self._dry_run:
+            print("Dry run")
+            return
+
+        self._cm.set_write_active()
+
+
+    def _load_plugin_panels(self) -> None:
+        """Load panels from plugins that have connected devices."""
+        plugin_panels = self._plugin_manager.get_plugin_panels(self.switch_panel)
+
+        for title, panel in plugin_panels.items():
+            self._add_plugin_panel(title, panel)
+
+
+    def _on_plugin_panel_available(self, plugin_name: str, panel) -> None:
+        """Called when a plugin's matching device is connected (from background thread)."""
+        title = panel.title
+        GLib.idle_add(self._add_plugin_panel, title, panel)
+
+
+    def _add_plugin_panel(self, title: str, panel) -> None:
+        """Add a plugin panel to the UI."""
+        if title in self._panels:
+            return
+
+        self._panels[title] = panel
+        self._sidebar_box.append(panel.button)
+        # Set button group to first panel's button for radio behavior
+        first_button = list(self._panels.values())[0].button
+        panel.button.set_group(first_button)
+        print(f"[APP] Added plugin panel: {title}")
+
+
+    def _shutdown(self, *_) -> None:
+        self._plugin_manager.stop()
+
+        for panel in self._panels.values():
+            panel.shutdown()
+
+        self._simapi_handler.stop()
+        self._ipc_handler.stop()
+        self._cm.shutdown()
+
+
+    def _activate_default(self) -> SettingsPanel:
+        self._panels["Home"].button.set_active(True)
+        return self._panels["Home"]
+
+
+    def _panel_buttons(self) -> list[Gtk.Button]:
+        buttons: list[Gtk.Button] = []
+        for panel in self._panels.values():
+            buttons.append(panel.button)
+
+        return buttons
+
+
+    def toggle_window(self):
+        for window in self.get_windows():
+            if window.is_visible():
+                window.hide()
+            else:
+                window.present()
+
+
+    def show_window(self):
+        windows = self.get_windows()
+
+        if len(windows) == 0:
+            self.on_activate(self)
+            return
+
+        for window in windows:
+            window.present()
+
+
+    def hide_window(self):
+        for window in self.get_windows():
+            window.hide()

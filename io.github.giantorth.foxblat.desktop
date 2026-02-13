@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Foxblat
+Comment=Moza Racing settings app + Telemetry
+GenericName=settings
+Path=/usr/bin/
+Exec=foxblat
+StartupWMClass=io.github.giantorth.foxblat
+Icon=io.github.giantorth.foxblat
+Terminal=false
+StartupNotify=true
+Categories=Game;Utility;
+Keywords=game;racing;cars;wheels;moza;

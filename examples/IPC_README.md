@@ -1,6 +1,6 @@
-# Boxflat IPC (Inter-Process Communication)
+# Foxblat IPC (Inter-Process Communication)
 
-Boxflat supports external program control via TCP socket. This allows other applications (including Windows games running under Wine/Proton) to change settings like steering lock angle and load presets while boxflat is running.
+Foxblat supports external program control via TCP socket. This allows other applications (including Windows games running under Wine/Proton) to change settings like steering lock angle and load presets while foxblat is running.
 
 ## Connection
 
@@ -147,7 +147,7 @@ Load a saved preset by name.
 
 ### 6. Ping
 
-Check if boxflat is running and responding.
+Check if foxblat is running and responding.
 
 **Request:**
 ```json
@@ -168,30 +168,30 @@ Check if boxflat is running and responding.
 
 ### Command Line
 
-The provided `boxflat_ipc_client.py` script can be used from the command line:
+The provided `foxblat_ipc_client.py` script can be used from the command line:
 
 ```bash
-./boxflat_ipc_client.py set-angle 900
-./boxflat_ipc_client.py get-angle
-./boxflat_ipc_client.py list-presets
-./boxflat_ipc_client.py load-preset GT3
-./boxflat_ipc_client.py status
-./boxflat_ipc_client.py ping
+./foxblat_ipc_client.py set-angle 900
+./foxblat_ipc_client.py get-angle
+./foxblat_ipc_client.py list-presets
+./foxblat_ipc_client.py load-preset GT3
+./foxblat_ipc_client.py status
+./foxblat_ipc_client.py ping
 ```
 
 ### As a Python Library
 
-Import and use the `BoxflatClient` class in your Python code:
+Import and use the `FoxblatClient` class in your Python code:
 
 ```python
-from boxflat_ipc_client import BoxflatClient
+from foxblat_ipc_client import FoxblatClient
 
 # Create client (connects to localhost:52845)
-client = BoxflatClient()
+client = FoxblatClient()
 
-# Check if boxflat is running
+# Check if foxblat is running
 if not client.ping():
-    print("Boxflat is not running!")
+    print("Foxblat is not running!")
     exit(1)
 
 # Set steering lock to 900 degrees
@@ -221,7 +221,7 @@ For Windows games running under Wine/Proton, use standard TCP networking:
 import socket
 import json
 
-def send_boxflat_command(command, **params):
+def send_foxblat_command(command, **params):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect(("127.0.0.1", 52845))
 
@@ -233,13 +233,13 @@ def send_boxflat_command(command, **params):
     return json.loads(response)
 
 # Set angle manually
-send_boxflat_command("set_angle", value=900)
+send_foxblat_command("set_angle", value=900)
 
 # Or load a preset
-send_boxflat_command("load_preset", name="GT3")
+send_foxblat_command("load_preset", name="GT3")
 
 # List available presets
-response = send_boxflat_command("list_presets")
+response = send_foxblat_command("list_presets")
 print(f"Presets: {response['presets']}")
 ```
 
@@ -262,7 +262,7 @@ echo '{"command":"get_angle"}' | nc 127.0.0.1 52845
 
 #pragma comment(lib, "ws2_32.lib")
 
-int boxflat_command(const char* json_command) {
+int foxblat_command(const char* json_command) {
     WSADATA wsa;
     SOCKET sock;
     struct sockaddr_in server;
@@ -294,11 +294,11 @@ int boxflat_command(const char* json_command) {
 // Usage in your game:
 void OnCarSelected(const char* carName) {
     if (strcmp(carName, "F1") == 0) {
-        boxflat_command("{\"command\":\"set_angle\",\"value\":360}");
+        foxblat_command("{\"command\":\"set_angle\",\"value\":360}");
     } else if (strcmp(carName, "GT3") == 0) {
-        boxflat_command("{\"command\":\"load_preset\",\"name\":\"GT3\"}");
+        foxblat_command("{\"command\":\"load_preset\",\"name\":\"GT3\"}");
     } else {
-        boxflat_command("{\"command\":\"set_angle\",\"value\":900}");
+        foxblat_command("{\"command\":\"set_angle\",\"value\":900}");
     }
 }
 ```
@@ -309,7 +309,7 @@ void OnCarSelected(const char* carName) {
 using System.Net.Sockets;
 using System.Text;
 
-public static void SetBoxflatAngle(int angle) {
+public static void SetFoxblatAngle(int angle) {
     TcpClient client = new TcpClient("127.0.0.1", 52845);
     string message = $"{{\"command\":\"set_angle\",\"value\":{angle}}}";
     byte[] data = Encoding.UTF8.GetBytes(message);
@@ -321,7 +321,7 @@ public static void SetBoxflatAngle(int angle) {
     client.Close();
 }
 
-public static void LoadBoxflatPreset(string presetName) {
+public static void LoadFoxblatPreset(string presetName) {
     TcpClient client = new TcpClient("127.0.0.1", 52845);
     string message = $"{{\"command\":\"load_preset\",\"name\":\"{presetName}\"}}";
     byte[] data = Encoding.UTF8.GetBytes(message);
@@ -335,7 +335,7 @@ public static void LoadBoxflatPreset(string presetName) {
 ```lua
 local socket = require("socket")
 
-function boxflat_command(cmd)
+function foxblat_command(cmd)
     local tcp = socket.tcp()
     tcp:connect("127.0.0.1", 52845)
     tcp:send(cmd)
@@ -345,24 +345,24 @@ function boxflat_command(cmd)
 end
 
 -- Usage
-boxflat_command('{"command":"set_angle","value":900}')
-boxflat_command('{"command":"load_preset","name":"GT3"}')
+foxblat_command('{"command":"set_angle","value":900}')
+foxblat_command('{"command":"load_preset","name":"GT3"}')
 ```
 
 ## Use Cases
 
 1. **Game Integration**: Games or launchers automatically set steering lock based on car/track
-2. **Wine/Proton Games**: Windows games control boxflat via standard TCP networking
+2. **Wine/Proton Games**: Windows games control foxblat via standard TCP networking
 3. **Profile Switching**: External profile managers change settings when switching between sims
-4. **Automation**: Scripts automate boxflat configuration
-5. **Third-party Tools**: Other tools extend boxflat's functionality
+4. **Automation**: Scripts automate foxblat configuration
+5. **Third-party Tools**: Other tools extend foxblat's functionality
 
 ## Example: Automatic Preset Switching
 
 ### From Python Script
 ```python
 #!/usr/bin/env python3
-from boxflat_ipc_client import BoxflatClient
+from foxblat_ipc_client import FoxblatClient
 
 # Game-to-preset mapping
 GAME_PRESETS = {
@@ -373,7 +373,7 @@ GAME_PRESETS = {
 }
 
 def launch_game_with_preset(game_name, game_command):
-    client = BoxflatClient()
+    client = FoxblatClient()
 
     if game_name in GAME_PRESETS:
         preset = GAME_PRESETS[game_name]
@@ -430,14 +430,14 @@ try:
     if response['status'] == 'ok':
         print("Success!")
 except ConnectionError:
-    print("Cannot connect to boxflat - is it running?")
+    print("Cannot connect to foxblat - is it running?")
 except RuntimeError as e:
     print(f"Command failed: {e}")
 ```
 
 ## Extending the IPC
 
-To add new commands, edit `boxflat/ipc_handler.py`:
+To add new commands, edit `foxblat/ipc_handler.py`:
 
 1. Add a new command handler method `_cmd_your_command()`
 2. Add the command to `_process_command()`

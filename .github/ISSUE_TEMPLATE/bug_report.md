@@ -27,7 +27,7 @@ Yes/No. You can add the current firmware version of the affected device
 ### Steps To Reproduce:
 <!--
 Example:
-1. Open Boxflat
+1. Open Foxblat
 2. Select Pedals page
 3. Select Brake tab
 4. Scroll down

@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """
+<<<<<<< HEAD
 Unit tests for foxblat.process_handler
+=======
+Unit tests for boxflat.process_handler
+>>>>>>> main
 
 Tests the ProcessInfo class and pattern matching functionality.
 """
@@ -12,7 +16,11 @@ import os
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
+<<<<<<< HEAD
 from foxblat.process_handler import ProcessInfo
+=======
+from boxflat.process_handler import ProcessInfo
+>>>>>>> main
 
 
 class TestProcessInfo(unittest.TestCase):
@@ -64,7 +72,11 @@ class TestPatternMatching(unittest.TestCase):
         """Set up test fixtures."""
         # Only import ProcessObserver when running on Linux or in test environment
         try:
+<<<<<<< HEAD
             from foxblat.process_handler import ProcessObserver
+=======
+            from boxflat.process_handler import ProcessObserver
+>>>>>>> main
             cls.observer = ProcessObserver()
         except Exception as e:
             cls.observer = None
@@ -151,7 +163,11 @@ class TestProcessObserverRegistration(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         try:
+<<<<<<< HEAD
             from foxblat.process_handler import ProcessObserver
+=======
+            from boxflat.process_handler import ProcessObserver
+>>>>>>> main
             self.observer = ProcessObserver()
         except Exception as e:
             self.observer = None

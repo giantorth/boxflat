@@ -77,7 +77,7 @@ class OldWheelSettings(SettingsPanel):
             [6700, 6900, 7200, 7400, 7600, 7700, 7800, 7800, 8000, 8100]
         ]
 
-        super().__init__("Wheel Old", button_callback, connection_manager, hid_handler)
+        super().__init__("ES Wheel", button_callback, connection_manager, hid_handler)
         self._cm.subscribe_connected("wheel-rpm-value1", self.active)
         self.set_banner_title(f"Device disconnected...")
 

@@ -248,11 +248,13 @@ class PluginManager(EventDispatcher):
                     print(f"[PluginManager] Device matched plugin '{plugin.name}': {device.name}")
 
                     # Create panel instance if first device and we have a button callback
+                    panel_just_created = False
                     if plugin.panel_instance is None and self._button_callback is not None:
                         self._instantiate_plugin_panel(plugin)
+                        panel_just_created = True
 
-                    # Notify the panel
-                    if plugin.panel_instance:
+                    # Notify the panel (skip if panel was just created, as _instantiate_plugin_panel already notified)
+                    if plugin.panel_instance and not panel_just_created:
                         try:
                             plugin.panel_instance.on_device_connected(device_info)
                             plugin.panel_instance.active(1)

@@ -1,11 +1,11 @@
 # Foxblat
 Foxblat for Moza Racing. Control your Moza gear settings... and more!
 
+This is a fork of the excellent [Boxflat by Lawstorant](https://github.com/Lawstorant/boxflat).  If you enjoy this project, please [sponsor](https://github.com/sponsors/Lawstorant) the original author of this program.
+
 <img alt="Wheelbase panel" src="screens/base.png">
 
-<a href="https://flathub.org/apps/io.github.lawstorant.foxblat">
-    <img alt="Get it on Flathub" src="https://flathub.org/api/badge?locale=en"/>
-</a>
+Flatpack coming soon 
 
 > [!NOTE]
 > [Sim Racing On Linux](https://simracingonlinux.com/)
@@ -20,32 +20,15 @@ Foxblat for Moza Racing. Control your Moza gear settings... and more!
 
 ## Functionality
 
-| Device          | Completeness  | WIP |
-| :-------------: | :-----------: | :-- |
-| Home page       | 100%          | |
-| Base            | 100%          | |
-| Wheel           | 100%          | |
-| Pedals          | 100%          | |
-| Dashboard       | LED control   | Display Settings |
-| Universal Hub   | 100%          | |
-| H-Pattern       | 100%          | |
-| Sequential      | 100%          | |
-| Handbrake       | 100%          | |
-| E-Stop          | 100%          | |
-| Stalks          | 100%          | |
-| Other settings  | 100%          | |
-| Presets         | 100%          | |
-| Generic devices | Detection fix | |
-
-### Ideas
-- Telemetry ingestion through REST API/WebSockets
-- Cammus support
-- PXN Support
-- Simagic support
-- H-Pattern and Sequential settings available for arbitrary HID devices
+Foxblat provides the following additional features:
+* Telemetry support via Simd/SimAPI: https://github.com/Spacefreak18/simapi
+* Presets can be saved on extended paths, not limited to process name only
+* Presets can be saved by vehicle (When simd is running)
+* Plugins are supported, read more [here](plugins/READMED.md)
+  * An example plugin for the Aliexpress GX-100 shifter is included, linux users need [this driver](https://github.com/JacKeTUs/hid-gx100-shifter)
 
 ### Firmware upgrades
-There are some EEPROM functions available, but I need to do more testing to make sure I won't brick anything. For now, just use Pit House on Windows if you can, as FW upgrade support is not coming in the near future.
+Not supported at this time.
 
 ## Compatibility
 Moza commands and their protocol is hardware agnostic, so any implemented feature should work with any wheelbase, wheel, pedal set etc. Some Wheel settings are device-specific (FSR Wheel dashboard for example)
@@ -58,8 +41,6 @@ Foxblat automatically detects is a device (shifter/pedals) needs a detection fix
 > Detection fix can be applied to any HID device as well (pedals, shifters, button boxes).
 
 # Installation
-## Flatpak (preferred method)
-Foxblat is available on **[Flathub](https://flathub.org/apps/io.github.lawstorant.foxblat)**
 
 ### Udev rule installation for flatpak
 Copy this into terminal and execute with root permissions
@@ -70,11 +51,14 @@ sudo tee /etc/udev/rules.d/99-foxblat.rules <<< 'SUBSYSTEM=="tty", KERNEL=="ttyA
 > [!IMPORTANT]
 > Unplug and plug in your deivce to trigger these new rules. Alternatively, you can reboot your system.
 
+## Flatpack
+Coming Soon
+
 ## Arch Linux:
-https://aur.archlinux.org/packages/foxblat-git
+Coming soon
 
 ## Void Linux:
-`xbps-install -S foxblat`
+Coming soon 
 
 ## Manual:
 This package depends on:
@@ -140,11 +124,7 @@ Below are some common problems and possible solutions:
 <img alt="Presets panel" src="screens/presets.png">
 
 ## Supporters
-I give my heartfelt THANK YOU to every supporter who felt like this was worth a little to spare. Special thanks go to:
-- [@abowen](https://github.com/abowen)
-- [@SkaterPaul](https://github.com/SkaterPaul)
-- [@m4tx](https://github.com/m4tx)
-- [@TylerCode](https://github.com/TylerCode)
-- [@Petjes-je](https://github.com/Petjes-je)
 
-**© 2025 Tomasz Pakuła Using Arch BTW**
+If you enjoy this project, please [sponsor](https://github.com/sponsors/Lawstorant) the original author of this program.
+
+**Original Boxflat © 2025 Tomasz Pakuła Using Arch BTW**

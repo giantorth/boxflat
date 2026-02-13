@@ -312,7 +312,7 @@ class MozaPresetHandler(SimpleEventDispatcher):
 
 
     def set_linked_process(self, process_name: str):
-        data = self._get_preset_data()
+        data = self._get_preset_data() or {}
         data["linked-process"] = process_name
         self._set_preset_data(data)
 
@@ -330,7 +330,7 @@ class MozaPresetHandler(SimpleEventDispatcher):
 
 
     def set_linked_vehicle(self, vehicle_name: str):
-        data = self._get_preset_data()
+        data = self._get_preset_data() or {}
         data["linked-vehicle"] = vehicle_name
         self._set_preset_data(data)
 
@@ -401,14 +401,7 @@ class MozaPresetHandler(SimpleEventDispatcher):
             if settings:
                 preset_data[f"plugin-{device_name}"] = settings
 
-        process_name = self.get_linked_process()
-        default = self.is_default()
         self._set_preset_data(preset_data)
-
-        if process_name is not None:
-            self.set_linked_process(process_name)
-        self.set_default(default)
-
         self._dispatch()
 
 

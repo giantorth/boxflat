@@ -375,6 +375,10 @@ class PluginManager(EventDispatcher):
                             print(f"[PluginManager] Error applying preset settings to {device_name}: {e}")
                         return
 
+            # No matching plugin found - log for debugging
+            available = [p.panel_instance.preset_device_name for p in self._plugins.values() if p.panel_instance]
+            print(f"[PluginManager] No plugin found for preset device '{device_name}'. Available: {available}")
+
     def has_active_plugins(self) -> bool:
         """Check if any plugins have connected devices."""
         with self._plugins_lock:

@@ -258,6 +258,7 @@ class PresetSettings(SettingsPanel):
         if self._plugin_manager:
             plugin_settings = pm.get_plugin_settings()
             for device_name, settings in plugin_settings.items():
+                print(f"[PRESETS] Applying settings for '{device_name}': {settings}")
                 self._plugin_manager.apply_plugin_preset_settings(device_name, settings)
 
         if not automatic and not default:

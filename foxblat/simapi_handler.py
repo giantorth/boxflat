@@ -323,6 +323,15 @@ class SimApiHandler(EventDispatcher):
         """Get the current auto-calibrated max RPM."""
         return self._calibrated_maxrpm
 
+    def get_current_car_name(self) -> str:
+        """Get the current car name, or empty string if none detected."""
+        if not self._last_car:
+            return ""
+        try:
+            return self._last_car.decode('utf-8', errors='ignore').rstrip('\x00')
+        except:
+            return ""
+
     def _open_shm(self) -> bool:
         """Open and memory-map the SimAPI shared memory file."""
         if self._mm is not None:

@@ -72,6 +72,10 @@ class FoxblatPresetDialog(Adw.Dialog, EventDispatcher):
         # Subscribe to SimAPI for current vehicle updates
         if simapi_handler:
             simapi_handler.subscribe("car-name", self._on_vehicle_update)
+            # Get current vehicle if already detected
+            current_car = simapi_handler.get_current_car_name()
+            if current_car:
+                self._on_vehicle_update(current_car)
 
         self._default = FoxblatSwitchRow("Default preset", "Activate if no other automatic preset applies")
         self._default.set_value(self._preset_handler.is_default())

@@ -289,29 +289,31 @@ class GX100Panel(PluginPanel):
 
     def on_preset_loaded(self, settings: dict) -> None:
         """Apply settings from loaded preset."""
+        print(f"[GX100] on_preset_loaded called with: {settings}")
+
         if "h-sensitivity" in settings:
             self._h_sensitivity = settings["h-sensitivity"]
-            GLib.idle_add(self._h_sens_row.set_value, self._h_sensitivity)
+            self._h_sens_row.set_value(self._h_sensitivity)
 
         if "seq-sensitivity" in settings:
             self._seq_sensitivity = settings["seq-sensitivity"]
-            GLib.idle_add(self._seq_sens_row.set_value, self._seq_sensitivity)
+            self._seq_sens_row.set_value(self._seq_sensitivity)
 
         if "combo-switch1" in settings:
             self._combo_switch1 = settings["combo-switch1"]
-            GLib.idle_add(self._combo1_row.set_value, self._combo_switch1)
+            self._combo1_row.set_value(self._combo_switch1)
 
         if "combo-switch2" in settings:
             self._combo_switch2 = settings["combo-switch2"]
-            GLib.idle_add(self._combo2_row.set_value, self._combo_switch2)
+            self._combo2_row.set_value(self._combo_switch2)
 
         if "pull-button" in settings:
             self._pull_button = settings["pull-button"]
-            GLib.idle_add(self._pull_row.set_value, self._pull_button)
+            self._pull_row.set_value(self._pull_button)
 
         if "sequential-mode" in settings:
             self._sequential_mode = settings["sequential-mode"]
-            GLib.idle_add(self._seq_mode_row.set_value, self._sequential_mode)
+            self._seq_mode_row.set_value(self._sequential_mode)
 
         # Auto-apply to device after loading preset
         GLib.idle_add(self._apply_config)
